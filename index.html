@@ -74,6 +74,8 @@
   function tutup() { B.classList.add('selesai'); setTimeout(function () { B.style.display = 'none'; }, 400); }
   function mulaiApp() {
     P.style.display = 'none'; $('panah').style.display = 'none'; B.style.display = 'flex'; B.classList.remove('selesai');
+    /* iPhone/Safari memblokir cookie Google di dalam bingkai (galat 401), jadi buka langsung tanpa bingkai. */
+    if (ios) { location.replace(url); return; }
     if (!f.getAttribute('src')) f.setAttribute('src', url);
     setTimeout(function () { $('bantu').style.display = 'block'; }, 9000);
   }
