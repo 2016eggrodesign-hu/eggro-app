@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>REPORT EGGRO</title>
+<meta name="theme-color" content="#653422">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EGGRO">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+  html, body { margin: 0; height: 100%; background: #fff; overflow: hidden; }
+  #app { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; }
+  #buka { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: #fff; color: #653422; font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 24px; transition: opacity .35s; }
+  #buka img { width: 120px; height: auto; }
+  #buka.selesai { opacity: 0; pointer-events: none; }
+  #buka p { margin: 0; }
+  #bantu { display: none; font-size: 13px; color: #6a5e56; }
+  #bantu a { color: #653422; font-weight: 600; }
+  .titik { display: inline-block; width: 28px; height: 28px; border: 3px solid #e5dcd4; border-top-color: #653422; border-radius: 50%; animation: p 0.9s linear infinite; }
+  @keyframes p { to { transform: rotate(360deg); } }
+
+  #pasang { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: flex-start;  gap: 18px; background: #fff; color: #2a1710; font: 18px/1.45 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 36px 24px 140px; overflow: auto; }
+  #pasang img.ik { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 6px 20px rgba(101,52,34,.25); }
+  #pasang h1 { margin: 0; font-size: 26px; font-weight: 800; }
+  #pasang p { margin: 0; color: #6a5e56; max-width: 380px; }
+  .besar { appearance: none; border: 0; border-radius: 18px; background: #653422; color: #fff; font: 800 22px/1 system-ui, sans-serif; padding: 20px 34px; width: 100%; max-width: 380px; box-shadow: 0 8px 22px rgba(101,52,34,.35); }
+  .kecil { appearance: none; border: 0; background: none; color: #653422; font: 600 16px/1.4 system-ui, sans-serif; text-decoration: underline; padding: 10px; }
+  .langkah { display: none; flex-direction: column; gap: 10px; width: 100%; max-width: 380px; text-align: left; }
+  .langkah .l { display: flex; gap: 14px; align-items: center; background: #f6f2ee; border-radius: 16px; padding: 14px 16px; font-size: 19px; color: #2a1710; }
+  .langkah .l b.n { flex: none; width: 38px; height: 38px; border-radius: 19px; background: #c2490f; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  #panah { display: none; position: fixed; left: 0; right: 0; bottom: 10px; text-align: center; color: #c2490f; font: 800 20px/1.2 system-ui, sans-serif; animation: lom 1s ease-in-out infinite; }
+  #panah .tp { font-size: 54px; line-height: 1; }
+  @keyframes lom { 0%,100% { transform: translateY(0); } 50% { transform: translateY(14px); } }
+  .ok { color: #1b6e45; font-weight: 800; font-size: 22px; }
+</style>
+</head>
+<body>
+<!-- Ganti alamat di bawah kalau link aplikasi REPORT EGGRO berubah (link akhiran /exec). -->
+<iframe id="app" title="REPORT EGGRO"
+  allow="camera; microphone; geolocation; clipboard-read; clipboard-write; fullscreen; autoplay; downloads"></iframe>
+
+<div id="pasang">
+  <img class="ik" src="icon-192.png" alt="EGGRO">
+  <h1>Pasang aplikasi EGGRO</h1>
+  <p id="ket">Satu ketuk, ikon EGGRO muncul di layar HP.</p>
+  <button class="besar" id="btn" type="button" hidden>PASANG SEKARANG</button>
+  <div class="langkah" id="lk"></div>
+  <p class="ok" id="sukses" hidden>Berhasil! Buka EGGRO dari ikon di layar HP.</p>
+  <button class="kecil" id="bukaWeb" type="button">Buka tanpa memasang</button>
+</div>
+<div id="panah"><div>Ketuk tombol Bagikan di bawah</div><div class="tp">&#8595;</div></div>
+<div id="buka" style="display:none">
+  <img src="icon-192.png" alt="EGGRO">
+  <div class="titik" id="titik" aria-hidden="true"></div>
+  <p id="teks">Membuka REPORT EGGRO&hellip;</p>
+  <p id="bantu">Lama? Pastikan internet aktif, atau <a id="langsung" href="#">buka lewat browser</a>.</p>
+</div>
+<script>
+(function () {
+  var f = document.getElementById('app'), P = document.getElementById('pasang'), B = document.getElementById('buka');
+  var ua = navigator.userAgent || '';
+  var url = 'https://script.google.com/macros/s/AKfycbztbwbMQH5d8m1ygIv_4PoBnyTqrGvFWeE4i1sTyvHAbYTjO2gKU6Pl3GbYWywX_qYP/exec';
+  var $ = function (i) { return document.getElementById(i); };
+  var app = false; try { app = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true || /[?&]app=1/.test(location.search); } catch (e) {}
+  var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+  var android = /Android/i.test(ua);
+  var safari = ios && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram|Line|WhatsApp/i.test(ua);
+  $('langsung').href = url;
+  function tutup() { B.classList.add('selesai'); setTimeout(function () { B.style.display = 'none'; }, 400); }
+  function mulaiApp() {
+    P.style.display = 'none'; $('panah').style.display = 'none'; B.style.display = 'flex'; B.classList.remove('selesai');
+    if (!f.getAttribute('src')) f.setAttribute('src', url);
+    setTimeout(function () { $('bantu').style.display = 'block'; }, 9000);
+  }
+  f.addEventListener('load', function () { if (f.getAttribute('src')) tutup(); });
+  window.addEventListener('online', function () { if (f.getAttribute('src')) f.src = url; });
+  if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); }); }
+
+  if (app) { mulaiApp(); return; }
+  P.style.display = 'flex';
+  $('bukaWeb').onclick = mulaiApp;
+  if (!(ios || android)) {
+    $('ket').textContent = 'Buka link ini di HP untuk memasang aplikasi. Di komputer, aplikasi bisa dibuka langsung.';
+    $('btn').hidden = false; $('btn').textContent = 'BUKA APLIKASI'; $('btn').onclick = mulaiApp; $('bukaWeb').style.display = 'none'; return;
+  }
+  function langkah(a) { var d = $('lk'); d.style.display = 'flex'; d.innerHTML = a.map(function (t, i) { return '<div class="l"><b class="n">' + (i + 1) + '</b><span>' + t + '</span></div>'; }).join(''); }
+  function sudah() { $('btn').hidden = true; $('lk').style.display = 'none'; $('panah').style.display = 'none'; $('sukses').hidden = false; $('ket').textContent = 'Tutup halaman ini, lalu ketuk ikon EGGRO di layar HP.'; $('bukaWeb').style.display = 'none'; }
+  window.addEventListener('appinstalled', sudah);
+  if (ios) {
+    if (!safari) {
+      $('ket').innerHTML = 'Di iPhone, pemasangan harus lewat <b>Safari</b>.';
+      var b = $('btn'); b.hidden = false; b.textContent = 'SALIN LINK';
+      b.onclick = function () { var u = location.href.split('#')[0]; var ok = function () { b.textContent = 'Link tersalin. Tempel di Safari.'; }; if (navigator.clipboard) navigator.clipboard.writeText(u).then(ok, ok); else ok(); };
+      langkah(['Ketuk <b>SALIN LINK</b> di atas', 'Buka aplikasi <b>Safari</b> (ikon kompas biru)', 'Tempel link di kolom alamat, lalu ikuti petunjuknya']);
+    } else {
+      $('ket').textContent = 'Ikuti 3 langkah ini:';
+      langkah(['Ketuk tombol <b>Bagikan</b> (kotak dengan panah ke atas) di bawah layar', 'Gulir, pilih <b>Tambah ke Layar Utama</b>', 'Ketuk <b>Tambah</b>. Selesai!']);
+      $('panah').style.display = 'block';
+    }
+    return;
+  }
+  var ev = null, btn = $('btn');
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); ev = e; btn.hidden = false; $('lk').style.display = 'none'; $('ket').textContent = 'Ketuk tombol di bawah, lalu ketuk Instal.'; });
+  btn.onclick = function () { if (!ev) return; ev.prompt(); ev.userChoice.then(function (c) { if (c && c.outcome === 'accepted') sudah(); ev = null; }); };
+  setTimeout(function () {
+    if (!ev && $('sukses').hidden) { $('ket').textContent = 'Ikuti 3 langkah ini:'; langkah(['Ketuk titik tiga <b>&#8942;</b> di kanan atas Chrome', 'Pilih <b>Instal aplikasi</b> (atau <b>Tambahkan ke layar utama</b>)', 'Ketuk <b>Instal</b>. Selesai!']); }
+  }, 2500);
+})();
+</script>
+</body>
+</html>
